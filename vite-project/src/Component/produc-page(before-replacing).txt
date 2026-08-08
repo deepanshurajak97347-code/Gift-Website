@@ -1,0 +1,134 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ALL_PRODUCTS } from '../constants'; // Back to constants!
+import '../style/ProductPage.css'; 
+
+export default function ProductPage() { // Added "default" back here
+  // 1. Grab "id" (NOT productId) to match your App.jsx route
+  const { id } = useParams();
+  
+  // Bulletproof matching: compares them both as strings
+  const product = ALL_PRODUCTS.find(p => String(p.id) === String(id));
+
+  // 2. State for the main image
+  const [mainImage, setMainImage] = useState(product?.image);
+
+  // 3. Update main image if the URL changes
+  useEffect(() => {
+    if (product) {
+      setMainImage(product.image);
+    }
+  }, [product]);
+
+  // 4. Header Scroll Logic
+  const [isScrolled, setIsScrolled] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 5. Error State (If someone types a fake ID in the URL)
+  if (!product) {
+    return (
+      <div style={{ textAlign: 'center', padding: '100px' }}>
+        <h2>Product not found</h2>
+        <Link to="/collections/our-best-sellers">Back to Best Sellers</Link>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* ================= STICKY HEADER ================= */}
+      <header className={isScrolled ? 'scrolled global-header' : 'global-header'}>
+        <div className="announcement-bar">
+          <span>Welcome to our store | Free shipping over Rs. 999</span>
+        </div>
+
+        <nav className="main-nav">
+          <button className="mobile-hamburger-menu">☰</button>
+          {/* <div className="logo">Your's Gifting</div> */}
+        
+          <ul className="desktop-menu">
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/collections/our-best-sellers">Catalog</Link></li>
+          </ul>
+        
+          <div className="utility-icons">
+            <button className="search">🔍</button>
+            <button className="cart">🛒</button>
+          </div>
+        </nav>
+      </header>
+
+      {/* ================= PRODUCT PAGE ================= */}
+      <div className="product-page">
+        <div className="product-container">
+          
+          {/* LEFT COLUMN: Image Gallery */}
+          <div className="product-gallery">
+            <div className="main-image-wrapper">
+              {product.sale && <span className="sale-badge">Sale</span>}
+              <img src={mainImage} alt={product.title} className="main-image" />
+            </div>
+
+            <div className="thumbnail-list">
+              {product.images?.map((img, index) => (
+                <img 
+                  key={index} 
+                  src={img} 
+                  alt={`${product.title} Thumbnail ${index + 1}`} 
+                  className={`thumbnail ${mainImage === img ? 'active' : ''}`}
+                  onClick={() => setMainImage(img)} 
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Product Info */}
+          <div className="product-details">
+            <p className="vendor-name">Your's gifting</p>
+            <h1 className="product-title">{product.title}</h1>
+            
+            <div className="pricing">
+              {product.oldPrice && <s className="old-price">Rs. {product.oldPrice}</s>}
+              <span className="current-price">Rs. {product.newPrice}</span>
+              {product.sale && <span className="sale-text">Sale</span>}
+            </div>
+            
+            <p className="tax-shipping-info">Tax included. Shipping calculated at checkout.</p>
+
+            <div className="quantity-selector">
+              <label>Quantity</label>
+              <div className="quantity-box">
+                <button className="qty-btn">-</button>
+                <input type="text" value="1" readOnly className="qty-input" />
+                <button className="qty-btn">+</button>
+              </div>
+            </div>
+
+            <div className="action-buttons">
+              <button className="add-to-cart-btn">Add to cart</button>
+              <button className="buy-it-now-btn">Buy it now</button>
+            </div>
+
+            <div className="product-description">
+              <p>{product.description}</p>
+            </div>
+
+            <div className="share-section">
+              <p>Share</p>
+              <div className="share-icons">
+                <span>(F)</span> <span>(T)</span> <span>(P)</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

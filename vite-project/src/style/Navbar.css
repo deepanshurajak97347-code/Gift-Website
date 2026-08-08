@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+
+/* =========================================
+   1. THE STICKY WRAPPER
+========================================= */
+.global-header {
+  position: sticky;
+  /* This is the magic math! 
+     It equals the exact height of the announcement bar.
+     It lets the black bar scroll up naturally, then locks the nav in place. */
+  top: -40px; 
+  z-index: 9999;
+  background-color: #ffffff;
+  transition: box-shadow 0.3s ease;
+}
+
+/* Adds a soft luxury shadow only when you scroll down */
+.global-header.scrolled {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================
+   2. ANNOUNCEMENT BAR
+========================================= */
+.announcement-bar {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  height: 40px; /* Locked exactly to 40px to match the wrapper math */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* =========================================
+   3. MAIN NAVIGATION BAR
+========================================= */
+.main-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 110px; /* Base luxury height */
+  padding: 0 40px;
+  background-color: #ffffff;
+  transition: height 0.3s ease; /* Smooth shrinking effect */
+}
+
+/* When scrolled, gracefully shrink the height so it takes up less screen */
+.global-header.scrolled .main-nav {
+  height: 80px; 
+}
+
+/* Keeps everything perfectly aligned in thirds */
+.nav-left, .nav-center, .nav-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.nav-left { justify-content: flex-start; }
+.nav-center { justify-content: center; }
+.nav-right { justify-content: flex-end; }
+
+/* =========================================
+   4. BRAND TYPOGRAPHY (Amber Gradient)
+========================================= */
+.brand-name {
+  font-family: 'Playfair Display', "Times New Roman", serif;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  
+  background: linear-gradient(45deg, #2D2522, #D4813B, #E5A93C, #2D2522);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent; 
+  transition: transform 0.3s ease;
+}
+
+.global-header.scrolled .brand-name {
+  transform: scale(0.9); /* Slightly shrinks logo when scrolled */
+}
+
+/* =========================================
+   5. ICONS & BUTTONS
+========================================= */
+.svg-btn {
+  background: none;
+  border: none;
+  color: #2D2522;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.svg-btn:hover {
+  opacity: 0.6;
+  transform: scale(1.05);
+}
+
+/* =========================================
+   6. SEARCH TAKEOVER UI
+========================================= */
+.active-search-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; 
+}
+
+.expanded-search-form {
+  display: flex;
+  align-items: center;
+  width: 50%; 
+  max-width: 600px;
+  border-bottom: 2px solid #2D2522;
+  padding-bottom: 5px;
+}
+
+.expanded-search-input {
+  flex: 1; 
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 18px;
+  color: #2D2522;
+  padding: 0 15px;
+}
+
+.expanded-search-input::placeholder {
+  color: #7A6B63;
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* =========================================
+   7. CART NOTIFICATION BADGE
+========================================= */
+.cart-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  background-color: #D4813B; 
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px; 
+  border: 2px solid #fff; 
+}
+
+/* =========================================
+   8. MOBILE RESPONSIVENESS
+========================================= */
+@media (max-width: 768px) {
+  .main-nav {
+    padding: 0 20px;
+  }
+  .brand-name {
+    font-size: 26px; 
+  }
+  .expanded-search-form {
+    width: 80%; /* Makes search wider on small screens */
+  }
+}

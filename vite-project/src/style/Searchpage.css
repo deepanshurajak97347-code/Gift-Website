@@ -1,0 +1,269 @@
+/* ================= SEARCH PAGE LAYOUT ================= */
+.search-page-wrapper {
+  background-color: #FDECE4; /* Your vibrant luxury theme! */
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 0 80px 0; /* Top and bottom spacing */
+}
+
+.search-page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  color: #2D2522; /* Espresso Brown text */
+}
+
+.search-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.search-header h1 {
+  font-family: 'Playfair Display', "Times New Roman", serif;
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.search-layout {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+/* ================= RESULTS TOOLBAR (Top of Grid) ================= */
+.results-toolbar {
+  display: flex;
+  justify-content: space-between; /* Pushes Count to Left, Sort to Right */
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #EED8C0; /* A soft divider line */
+}
+
+.product-count {
+  color: #7A6B63;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.sort-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #7A6B63;
+  font-size: 14px;
+}
+
+.sort-dropdown {
+  background-color: transparent;
+  color: #2D2522;
+  border: 1px solid #7A6B63;
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.sort-dropdown:focus {
+  border-color: #D4813B; /* Highlights amber when clicked */
+}
+
+/* ================= SIDEBAR (LEFT) ================= */
+.search-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 150px; /* Stays on screen when user scrolls down! */
+}
+
+.filter-group {
+  margin-bottom: 40px;
+}
+
+.filter-group h3 {
+  font-family: 'Playfair Display', "Times New Roman", serif;
+  font-size: 20px;
+  border-bottom: 1px solid #D4813B;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.filter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.filter-list li {
+  margin-bottom: 10px;
+}
+
+.filter-btn {
+  background: none;
+  border: none;
+  color: #7A6B63;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.filter-btn:hover {
+  color: #D4813B;
+}
+
+.filter-btn.active {
+  color: #2D2522;
+  font-weight: bold;
+}
+
+.sort-dropdown {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #7A6B63;
+  background-color: transparent;
+  color: #2D2522;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* ================= PRODUCT GRID (RIGHT) ================= */
+.search-results {
+  flex: 1; /* Takes up the remaining space */
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 40px;
+}
+
+.card-image-wrapper {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+.card-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.product-card:hover .card-image-wrapper img {
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+.sale-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: #D12E2E;
+  color: white;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-info {
+  margin-top: 15px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #2D2522;
+  margin: 0 0 8px 0;
+}
+
+.card-pricing {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.current-price {
+  font-weight: bold;
+  color: #2D2522;
+}
+
+.old-price {
+  color: #7A6B63;
+  text-decoration: line-through;
+  font-size: 14px;
+}
+
+.no-results {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.reset-btn {
+  margin-top: 20px;
+  padding: 12px 25px;
+  background-color: #2D2522;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+
+/* ================= RESPONSIVE DESIGN (Mobile & Tablet) ================= */
+@media (max-width: 900px) {
+  
+  /* 1. Stack the sidebar and the grid on top of each other */
+  .search-layout {
+    flex-direction: column; 
+    gap: 30px;
+  }
+
+  /* 2. Make the sidebar take up the full width instead of just 250px */
+  .search-sidebar {
+    width: 100%;
+    position: static; /* Removes the sticky behavior on mobile */
+  }
+
+  /* 3. Turn the vertical category list into a horizontal wrap */
+  .filter-list {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 10px;
+  }
+
+  /* 4. Style the category text as clickable "pills" for touch screens */
+  .filter-list li {
+    margin-bottom: 0;
+  }
+
+  .filter-btn {
+    background-color: transparent;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #7A6B63;
+    text-align: center;
+  }
+  
+  .filter-btn.active {
+    background-color: #2D2522;
+    color: #fff;
+    border-color: #2D2522;
+  }
+
+  /* 5. Stack the toolbar (Total products & Sort dropdown) if screen gets very small */
+  @media (max-width: 500px) {
+    .results-toolbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+  }
+}
