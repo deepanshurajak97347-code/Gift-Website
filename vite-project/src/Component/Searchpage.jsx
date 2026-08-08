@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import { ALL_PRODUCTS } from '../constants'; // Adjust path if needed
-import '../style/SearchPage.css';
+import '../style/Searchpage.css';
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
