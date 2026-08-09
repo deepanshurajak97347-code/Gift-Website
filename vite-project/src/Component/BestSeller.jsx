@@ -1,52 +1,83 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ALL_PRODUCTS } from '../constants'; 
 import Navbar from './Navbar';
-// You no longer need BestSeller.css if you put the layout CSS in your main file!
+
+// 1. Import Firebase tools (Make sure the path to firebase.js is correct!)
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase'; 
+// Notice we removed: import { ALL_PRODUCTS } from '../constants';
 
 export function BestSeller() {
-  const [activeCategory, setActiveCategory] = useState('All');
+  // 2. New State for Firebase Data
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   
-  // NEW: State for sorting
+  const [activeCategory, setActiveCategory] = useState('All');
   const [sortOrder, setSortOrder] = useState('default');
 
-  // NEW: Automatically pulls all unique categories from constants!
-  const allCategories = ['All', ...new Set(ALL_PRODUCTS.map(product => product.category))];
+  // 3. Fetch data from Firebase when the page loads
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "products"));
+        const productsArray = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setProducts(productsArray);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      }
+    };
 
-  // NEW: Filters AND Sorts the products dynamically
+    fetchProducts();
+  }, []);
+
+  // 4. Now this pulls categories dynamically from your CLOUD data!
+  const allCategories = ['All', ...new Set(products.map(product => product.category))];
+
+  // 5. Update useMemo to look at the 'products' state instead of ALL_PRODUCTS
   const displayedProducts = useMemo(() => {
-    let result = ALL_PRODUCTS;
+    let result = products;
 
     if (activeCategory !== 'All') {
       result = result.filter(product => product.category === activeCategory);
     }
 
     if (sortOrder === 'low-high') {
-      result = [...result].sort((a, b) => parseFloat(a.newPrice.replace(/,/g, '')) - parseFloat(b.newPrice.replace(/,/g, '')));
+      // Wrapped in String() just in case the database saved it as a raw number
+      result = [...result].sort((a, b) => parseFloat(String(a.newPrice).replace(/,/g, '')) - parseFloat(String(b.newPrice).replace(/,/g, '')));
     } else if (sortOrder === 'high-low') {
-      result = [...result].sort((a, b) => parseFloat(b.newPrice.replace(/,/g, '')) - parseFloat(a.newPrice.replace(/,/g, '')));
+      result = [...result].sort((a, b) => parseFloat(String(b.newPrice).replace(/,/g, '')) - parseFloat(String(a.newPrice).replace(/,/g, '')));
     }
 
     return result;
-  }, [activeCategory, sortOrder]);
+  }, [products, activeCategory, sortOrder]);
 
+  // Show a loading screen while waiting for the cloud
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div style={{ textAlign: "center", padding: "100px", fontSize: "1.5rem" }}>
+          Loading amazing gifts...
+        </div>
+      </>
+    );
+  }
+
+  // 6. Your layout remains EXACTLY the same!
   return (
     <>
       <Navbar />
 
-      {/* The Vibrant Background Wrapper */}
       <div className="search-page-wrapper">
-        
-        {/* We reuse the Search page CSS classes here for a perfect, uniform layout! */}
         <div className="search-page-container">
-          
-{/*           <header className="search-header">
-            <h1>Our Best Sellers</h1>
-          </header> */}
-
           <div className="search-layout">
             
-            {/* === 1. LEFT SIDEBAR (Categories) === */}
+            {/* === LEFT SIDEBAR === */}
             <aside className="search-sidebar">
               <div className="filter-group">
                 <h3>Categories</h3>
@@ -65,10 +96,9 @@ export function BestSeller() {
               </div>
             </aside>
 
-            {/* === 2. RIGHT SIDE (Toolbar + Products) === */}
+            {/* === RIGHT SIDE === */}
             <main className="search-results">
               
-              {/* THIS IS THE FIX: The Toolbar pushes Sort to the right! */}
               <div className="results-toolbar">
                 <span className="product-count">
                   {displayedProducts.length} {displayedProducts.length === 1 ? 'product' : 'products'}
