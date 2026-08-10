@@ -1,54 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-
-// 1. Import Firebase tools for fetching a SINGLE document
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase'; 
-
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import '../style/ProductPage.css'; 
 import Navbar from './Navbar';
 
-export default function ProductPage() {
-  const { id } = useParams(); // This grabs the Firebase ID from the URL
+export default function ProductPage({ products, loading }) {
+  const { id } = useParams(); 
   const navigate = useNavigate();
   
-  // 2. Set up state for our cloud data
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [mainImage, setMainImage] = useState("");
+  const location = useLocation();
+  const instantProduct = location.state?.productData;
+  
+  const [product, setProduct] = useState(instantProduct || null);
+  const [mainImage, setMainImage] = useState(instantProduct?.image || "");
   const [quantity, setQuantity] = useState(1);
 
-  // 3. Fetch just THIS ONE product from Firebase when the page loads
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        // Point directly to the document with this specific ID in the "products" collection
-        const docRef = doc(db, "products", id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          const productData = { id: docSnap.id, ...docSnap.data() };
-          setProduct(productData);
-          setMainImage(productData.image);
-        } else {
-          console.error("Product not found in database!");
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching product:", error);
-        setLoading(false);
+    if (!instantProduct && products.length > 0) {
+      const foundProduct = products.find(p => p.id === id);
+      if (foundProduct) {
+        setProduct(foundProduct);
+        setMainImage(foundProduct.image);
       }
-    };
+    }
+  }, [id, products, instantProduct]);
 
-    fetchProduct();
-  }, [id]);
-
-
-  // ------------------------------------------------------------------
-  // CORE FUNCTIONALITY: Saving to LocalStorage (Untouched!)
-  // ------------------------------------------------------------------
   const addToCartLogic = () => {
-    if (!product) return; // Safety check
+    if (!product) return; 
     const existingCart = JSON.parse(localStorage.getItem('cart')) || [];
     const itemIndex = existingCart.findIndex(item => item.id === product.id);
     
@@ -74,8 +51,7 @@ export default function ProductPage() {
     navigate('/cart');
   };
 
-  // 4. Show a loading state while fetching from the cloud
-  if (loading) {
+  if (loading && !product) {
     return (
       <>
         <Navbar />
@@ -86,7 +62,6 @@ export default function ProductPage() {
     );
   }
 
-  // 5. If the URL has a bad ID, show an error instead of crashing
   if (!product) {
     return (
       <>
@@ -105,11 +80,34 @@ export default function ProductPage() {
        <div className="product-page">
          <div className="product-container">
            
-           {/* Gallery */}
+           {/* === NEW GALLERY SECTION === */}
            <div className="product-gallery">
              <div className="main-image-wrapper">
-               <img src={mainImage} alt={product.title} className="main-image" />
+               <img src={mainImage} alt={product.title} className="main-image" loading="lazy" />
              </div>
+             
+             {/* Map through the images array to create clickable thumbnails */}
+             {product.images && product.images.length > 0 && (
+               <div className="thumbnail-row" style={{ display: 'flex', gap: '10px', marginTop: '15px', overflowX: 'auto' }}>
+                 {product.images.map((imgUrl, index) => (
+                   <img 
+                     key={index} 
+                     src={imgUrl} 
+                     alt={`Thumbnail ${index + 1}`} 
+                     onClick={() => setMainImage(imgUrl)}
+                     style={{ 
+                       width: '80px', 
+                       height: '80px', 
+                       objectFit: 'cover', 
+                       cursor: 'pointer',
+                       border: mainImage === imgUrl ? '2px solid #333' : '1px solid #ddd',
+                       borderRadius: '6px',
+                       transition: 'border 0.2s ease'
+                     }} 
+                   />
+                 ))}
+               </div>
+             )}
            </div>
 
            {/* Details */}
@@ -117,7 +115,6 @@ export default function ProductPage() {
              <h1 className="product-title">{product.title}</h1>
              <div className="pricing">
                <span className="current-price">Rs. {product.newPrice}</span>
-               {/* Added your oldPrice strikethrough back in just in case! */}
                {product.oldPrice && <del style={{ marginLeft: "10px", color: "gray" }}>Rs. {product.oldPrice}</del>}
              </div>
              
@@ -131,16 +128,28 @@ export default function ProductPage() {
                </div>
              </div>
 
-             {/* Buttons mapped to logic */}
              <div className="action-buttons">
                <button className="add-to-cart-btn" onClick={handleAddToCart}>Add to cart</button>
                <button className="buy-it-now-btn" onClick={handleBuyItNow}>Buy it now</button>
              </div>
 
-             {/* Here is your description! It will show up now! */}
-             <div className="product-description">
-               <p>{product.description}</p>
+             {/* === NEW WHAT'S INSIDE SECTION === */}
+             {product.whatsInside && product.whatsInside.length > 0 && (
+               <div className="whats-inside" style={{ marginTop: "20px", padding: "15px", backgroundColor: "#f9f9f9", borderRadius: "8px" }}>
+                 <h3 style={{ marginBottom: "10px", fontSize: "1.1rem" }}>What's Inside:</h3>
+                 <ul style={{ paddingLeft: "20px", margin: 0, lineHeight: "1.6" }}>
+                   {product.whatsInside.map((item, index) => (
+                     <li key={index}>{item}</li>
+                   ))}
+                 </ul>
+               </div>
+             )}
+
+             <div className="product-description" style={{ marginTop: "20px" }}>
+               <h3 style={{ marginBottom: "10px", fontSize: "1.1rem" }}>Description:</h3>
+               <p style={{ lineHeight: "1.6" }}>{product.description}</p>
              </div>
+             
            </div>
          </div>
        </div>

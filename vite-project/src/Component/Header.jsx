@@ -93,10 +93,13 @@ export function LandingPage(){
 
                   <ul className="contact-details">
                     <li>
-                        Email id- <a href="mailto:yours.business2701@gmail.com" style={{ color: 'inherit', textDecoration: 'underline' }}>yours.business2701@gmail.com</a>
+                        Contact No- <a href="tel:+919244740820" style={{ color: 'inherit', textDecoration: 'underline' }}>9244740820</a>, <a href="tel:+919873338272" style={{ color: 'inherit', textDecoration: 'underline' }}>9873338272</a>
                     </li>
                     <li>
-                        Insta- <a href="" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>@yours.official.in</a>
+                        Email id- <a href="mailto:amberandsol14@gmail.com" style={{ color: 'inherit', textDecoration: 'underline' }}>amberandsol14@gmail.com</a>
+                    </li>
+                    <li>
+                        Insta- <a href="https://www.instagram.com/amberandsol14?igsh=MTEwM2U4YXJjbjByNw%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>@amberandsol14</a>
                     </li>
                   </ul>
             </section>

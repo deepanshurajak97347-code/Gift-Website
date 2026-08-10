@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore"; // 1. ADDED updateDoc
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 import { db, auth } from "../firebase";
 
@@ -14,17 +14,24 @@ export default function Admin() {
   const [newPrice, setNewPrice] = useState("");
   const [category, setCategory] = useState("Birthday");
   const [description, setDescription] = useState("");
+  const [whatsInside, setWhatsInside] = useState(""); 
   const [sale, setSale] = useState(false);
-  const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const [products, setProducts] = useState([]);
-  
-  // NEW: States to track if we are editing
-  const [editingId, setEditingId] = useState(null);
-  const [existingImageUrl, setExistingImageUrl] = useState("");
+  // === NEW: Image States for up to 4 images ===
+  const [imageFile1, setImageFile1] = useState(null);
+  const [imageFile2, setImageFile2] = useState(null);
+  const [imageFile3, setImageFile3] = useState(null);
+  const [imageFile4, setImageFile4] = useState(null);
 
-  const IMGBB_API_KEY = "f21582ff8c2a31270c74dfb9131a0885";
+  const [products, setProducts] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  
+  // Track existing images for editing
+  const [existingImages, setExistingImages] = useState([]);
+
+ 
+  const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -58,7 +65,6 @@ export default function Admin() {
 
   const handleLogout = async () => await signOut(auth);
 
-  // NEW: Function to load product data into the form
   const handleEditClick = (product) => {
     setEditingId(product.id);
     setTitle(product.title);
@@ -66,52 +72,86 @@ export default function Admin() {
     setNewPrice(product.newPrice);
     setCategory(product.category);
     setDescription(product.description);
+    setWhatsInside(product.whatsInside ? product.whatsInside.join('\n') : "");
     setSale(product.sale || false);
-    setExistingImageUrl(product.image); // Save the old image URL
-    setImageFile(null); // Clear any newly selected files
-    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll up to the form
+    
+    // Load existing images into state (fallback to empty array if none)
+    setExistingImages(product.images || [product.image]); 
+    
+    // Clear any new files selected
+    setImageFile1(null); setImageFile2(null); setImageFile3(null); setImageFile4(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // NEW: Function to cancel editing
   const resetForm = () => {
     setEditingId(null);
-    setTitle(""); setOldPrice(""); setNewPrice(""); setDescription(""); 
-    setCategory("Birthday"); setSale(false); setExistingImageUrl(""); setImageFile(null);
+    setTitle(""); setOldPrice(""); setNewPrice(""); setDescription(""); setWhatsInside(""); 
+    setCategory("Birthday"); setSale(false); 
+    setExistingImages([]);
+    setImageFile1(null); setImageFile2(null); setImageFile3(null); setImageFile4(null);
+  };
+
+  // === NEW: Helper function to cleanly upload a single file to ImgBB ===
+  const uploadToImgBB = async (file) => {
+    if (!file) return null;
+    const formData = new FormData();
+    formData.append("image", file);
+    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { 
+      method: "POST", 
+      body: formData 
+    });
+    const data = await response.json();
+    return data.data.url; // Returns the live URL
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // If adding new, image is required. If editing, it's optional.
-    if (!editingId && !imageFile) {
-      alert("Please choose an image to upload!");
+    // Require at least the main image for new products
+    if (!editingId && !imageFile1) {
+      alert("Please choose at least a Main Image!");
       return;
     }
 
     setIsUploading(true); 
     try {
-      let finalImageUrl = existingImageUrl;
+      // 1. Keep existing URLs if we are editing and they didn't pick a new file
+      let url1 = existingImages[0] || "";
+      let url2 = existingImages[1] || "";
+      let url3 = existingImages[2] || "";
+      let url4 = existingImages[3] || "";
 
-      // Only upload to ImgBB if they actually selected a NEW image
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("image", imageFile);
-        const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
-        const imgbbData = await imgbbResponse.json();
-        finalImageUrl = imgbbData.data.url;
-      }
+      // 2. Upload any NEW files they selected
+      if (imageFile1) url1 = await uploadToImgBB(imageFile1);
+      if (imageFile2) url2 = await uploadToImgBB(imageFile2);
+      if (imageFile3) url3 = await uploadToImgBB(imageFile3);
+      if (imageFile4) url4 = await uploadToImgBB(imageFile4);
+
+      // 3. Filter out any blank spots (in case they only uploaded 2 or 3 images)
+      const finalImagesArray = [url1, url2, url3, url4].filter(url => url !== "");
+
+      // 4. Format the What's Inside text
+      const whatsInsideArray = whatsInside
+        .split('\n')
+        .map(item => item.trim())
+        .filter(item => item !== "");
 
       const productData = {
-        title, category, image: finalImageUrl, oldPrice, newPrice, sale, description,
-        images: [finalImageUrl, "https://via.placeholder.com/600x800?text=More+Images+Soon"]
+        title, 
+        category, 
+        image: finalImagesArray[0], // Main cover image is always the first one
+        images: finalImagesArray,   // The full gallery array
+        oldPrice, 
+        newPrice, 
+        sale, 
+        description,
+        whatsInside: whatsInsideArray
       };
 
       if (editingId) {
-        // UPDATE EXISTING PRODUCT
         await updateDoc(doc(db, "products", editingId), productData);
         alert("Product successfully updated!");
       } else {
-        // ADD NEW PRODUCT
         await addDoc(collection(db, "products"), productData);
         alert("New product added!");
       }
@@ -160,41 +200,71 @@ export default function Admin() {
         <button onClick={handleLogout} style={{ padding: "6px 12px", background: "#ff4d4d", color: "white", border: "none", cursor: "pointer" }}>Logout</button>
       </div>
       
-      {/* ADD / EDIT FORM */}
       <div style={{ padding: "20px", background: editingId ? "#e6f7ff" : "#f9f9f9", border: editingId ? "2px solid #1890ff" : "none", borderRadius: "8px", marginBottom: "40px" }}>
         <h3>{editingId ? "✏️ Edit Product" : "➕ Add New Product"}</h3>
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required style={{ padding: "8px" }}/>
-          <input type="text" placeholder="Old Price (Optional)" value={oldPrice} onChange={(e) => setOldPrice(e.target.value)} style={{ padding: "8px" }}/>
-          <input type="text" placeholder="New Price" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required style={{ padding: "8px" }}/>
+          
+          <div style={{ display: "flex", gap: "10px" }}>
+            <input type="text" placeholder="New Price" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required style={{ padding: "8px", flex: 1 }}/>
+            <input type="text" placeholder="Old Price (Optional)" value={oldPrice} onChange={(e) => setOldPrice(e.target.value)} style={{ padding: "8px", flex: 1 }}/>
+          </div>
+
           <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ padding: "8px" }}>
             <option value="Birthday">Birthday</option>
             <option value="Anniversary">Anniversary</option>
             <option value="Rakhi">Rakhi</option>
           </select>
+          
           <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} required style={{ padding: "8px", minHeight: "80px" }} />
           
-          <div style={{ padding: "10px", border: "1px dashed #ccc", background: "white" }}>
-            <label style={{ display: "block", marginBottom: "5px", fontSize: "14px" }}>
-              {editingId ? "Change Image (Optional):" : "Upload Image:"}
-            </label>
-            <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} required={!editingId} />
-            {editingId && existingImageUrl && !imageFile && (
-              <p style={{ fontSize: "12px", color: "gray", marginTop: "5px" }}>Current image will be kept.</p>
-            )}
+          <textarea 
+            placeholder="What's Inside? (Type each item on a new line)" 
+            value={whatsInside} 
+            onChange={(e) => setWhatsInside(e.target.value)} 
+            style={{ padding: "8px", minHeight: "100px" }} 
+          />
+          
+          {/* === NEW UI: 4 Image Upload Slots === */}
+          <div style={{ padding: "15px", border: "1px dashed #ccc", background: "white", display: "flex", flexDirection: "column", gap: "15px" }}>
+            <h4 style={{ margin: 0 }}>Product Images (Up to 4)</h4>
+            
+            <div>
+              <label style={{ fontSize: "14px", fontWeight: "bold" }}>1. Main Cover Image {editingId ? "(Optional)" : "*"}</label>
+              <input type="file" accept="image/*" onChange={(e) => setImageFile1(e.target.files[0])} required={!editingId} style={{ display: "block", marginTop: "5px" }} />
+              {editingId && existingImages[0] && !imageFile1 && <span style={{ fontSize: "12px", color: "green" }}>Currently saved: {existingImages[0].substring(0, 30)}...</span>}
+            </div>
+
+            <div>
+              <label style={{ fontSize: "14px" }}>2. Gallery Image (Optional)</label>
+              <input type="file" accept="image/*" onChange={(e) => setImageFile2(e.target.files[0])} style={{ display: "block", marginTop: "5px" }} />
+              {editingId && existingImages[1] && !imageFile2 && <span style={{ fontSize: "12px", color: "green" }}>Currently saved: {existingImages[1].substring(0, 30)}...</span>}
+            </div>
+
+            <div>
+              <label style={{ fontSize: "14px" }}>3. Gallery Image (Optional)</label>
+              <input type="file" accept="image/*" onChange={(e) => setImageFile3(e.target.files[0])} style={{ display: "block", marginTop: "5px" }} />
+              {editingId && existingImages[2] && !imageFile3 && <span style={{ fontSize: "12px", color: "green" }}>Currently saved: {existingImages[2].substring(0, 30)}...</span>}
+            </div>
+
+            <div>
+              <label style={{ fontSize: "14px" }}>4. Gallery Image (Optional)</label>
+              <input type="file" accept="image/*" onChange={(e) => setImageFile4(e.target.files[0])} style={{ display: "block", marginTop: "5px" }} />
+              {editingId && existingImages[3] && !imageFile4 && <span style={{ fontSize: "12px", color: "green" }}>Currently saved: {existingImages[3].substring(0, 30)}...</span>}
+            </div>
           </div>
 
-          <label style={{ display: "flex", gap: "10px", alignItems: "center", cursor: "pointer" }}>
+          <label style={{ display: "flex", gap: "10px", alignItems: "center", cursor: "pointer", padding: "10px 0" }}>
             <input type="checkbox" checked={sale} onChange={(e) => setSale(e.target.checked)} />
-            Is this on Sale?
+            <strong style={{ color: "#ff4d4d" }}>Mark as "On Sale"</strong>
           </label>
           
           <div style={{ display: "flex", gap: "10px" }}>
-            <button type="submit" disabled={isUploading} style={{ flex: 1, padding: "10px", background: isUploading ? "gray" : (editingId ? "#1890ff" : "#333"), color: "white", cursor: isUploading ? "not-allowed" : "pointer" }}>
-              {isUploading ? "Saving..." : (editingId ? "Update Product" : "Add Product")}
+            <button type="submit" disabled={isUploading} style={{ flex: 1, padding: "12px", background: isUploading ? "gray" : (editingId ? "#1890ff" : "#333"), color: "white", cursor: isUploading ? "not-allowed" : "pointer", fontSize: "16px", fontWeight: "bold", border: "none", borderRadius: "4px" }}>
+              {isUploading ? "Uploading Images & Saving..." : (editingId ? "Update Product" : "Add Product")}
             </button>
             {editingId && (
-              <button type="button" onClick={resetForm} style={{ padding: "10px", background: "#eee", color: "#333", border: "1px solid #ccc", cursor: "pointer" }}>
+              <button type="button" onClick={resetForm} style={{ padding: "12px", background: "#eee", color: "#333", border: "1px solid #ccc", cursor: "pointer", borderRadius: "4px" }}>
                 Cancel
               </button>
             )}
@@ -202,18 +272,17 @@ export default function Admin() {
         </form>
       </div>
 
-      {/* PRODUCT LIST */}
       <div>
         <h3>Manage Existing Products</h3>
         {products.length === 0 ? <p>No products found.</p> : (
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             {products.map((product) => (
-              <div key={product.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", border: "1px solid #eee", borderRadius: "5px" }}>
+              <div key={product.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", border: "1px solid #eee", borderRadius: "5px", background: "white" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
                   <img src={product.image} alt={product.title} style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "4px" }} />
                   <div>
                     <strong>{product.title}</strong>
-                    <div style={{ fontSize: "14px", color: "#666" }}>₹{product.newPrice} | {product.category}</div>
+                    <div style={{ fontSize: "14px", color: "#666" }}>₹{product.newPrice} | {product.category} | {product.images?.length || 1} Images</div>
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: "10px" }}>

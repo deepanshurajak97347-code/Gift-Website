@@ -3,47 +3,26 @@ import { useSearchParams, Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import '../style/Searchpage.css';
 
-// 1. Import Firebase instead of ALL_PRODUCTS
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase'; 
+// 1. Notice: No Firebase imports here anymore!
 
-export default function SearchPage() {
+// 2. Accept products and loading as props from App.jsx
+export default function SearchPage({ products, loading }) {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   
-  // 2. New State for Firebase Products
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortOrder, setSortOrder] = useState('default');
 
-  // 3. Fetch data from Firebase when the page loads
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "products"));
-        const productsArray = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setProducts(productsArray);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
+  // 3. Added Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12; 
 
-    fetchProducts();
-  }, []);
-
-  // 4. Dynamically generate categories from CLOUD data
+  // Dynamically generate categories from CLOUD data
   const allCategories = ['All', ...new Set(products.map(product => product.category))];
 
-  // 5. Update the master search algorithm to use 'products' state
+  // The master search algorithm
   const filteredProducts = useMemo(() => {
-    let result = products;
+    let result = products; // Uses the prop from App.jsx
 
     if (query) {
       const lowerQuery = query.toLowerCase();
@@ -66,7 +45,18 @@ export default function SearchPage() {
     return result;
   }, [products, query, activeCategory, sortOrder]);
 
-  // Show a loading screen while fetching
+  // Reset to Page 1 if the user searches a new word, changes category, or changes sort
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, activeCategory, sortOrder]);
+
+  // 4. Pagination Math
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  // We only show these specific 12 products on the screen
+  const currentProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+
+  // Show a loading screen if App.jsx is still grabbing data on first load
   if (loading) {
     return (
       <>
@@ -92,7 +82,6 @@ export default function SearchPage() {
 
           <div className="search-layout">
             
-            {/* === LEFT SIDEBAR === */}
             <aside className="search-sidebar">
               <div className="filter-group">
                 <h3>Categories</h3>
@@ -111,7 +100,6 @@ export default function SearchPage() {
               </div>
             </aside>
 
-            {/* === RIGHT SIDE === */}
             <main className="search-results">
               
               <div className="results-toolbar">
@@ -135,25 +123,55 @@ export default function SearchPage() {
               </div>
 
               {filteredProducts.length > 0 ? (
-                <div className="product-grid">
-                  {filteredProducts.map((product) => (
-                    <article key={product.id} className="product-card">
-                      <Link to={`/products/${product.id}`} style={{ textDecoration: 'none' }}>
-                        <div className="card-image-wrapper">
-                          <img src={product.image} alt={product.title} />
-                          {product.sale && <span className="sale-badge">Sale</span>}
-                        </div>
-                        <div className="card-info">
-                          <h3 className="card-title">{product.title}</h3>
-                          <div className="card-pricing">
-                            <span className="current-price">Rs. {product.newPrice}</span>
-                            {product.oldPrice && <span className="old-price">Rs. {product.oldPrice}</span>}
+                <>
+                  <div className="product-grid">
+                    {/* 5. Map over currentProducts instead of filteredProducts */}
+                    {currentProducts.map((product) => (
+                      <article key={product.id} className="product-card">
+                        {/* 6. INSTANT LOAD: Pass the state to the Product Page */}
+                        <Link to={`/products/${product.id}`} state={{ productData: product }} style={{ textDecoration: 'none' }}>
+                          <div className="card-image-wrapper">
+                            {/* 7. LAZY LOADING added here */}
+                            <img src={product.image} alt={product.title} loading="lazy" />
+                            {product.sale && <span className="sale-badge">Sale</span>}
                           </div>
-                        </div>
-                      </Link>
-                    </article>
-                  ))}
-                </div>
+                          <div className="card-info">
+                            <h3 className="card-title">{product.title}</h3>
+                            <div className="card-pricing">
+                              <span className="current-price">Rs. {product.newPrice}</span>
+                              {product.oldPrice && <span className="old-price">Rs. {product.oldPrice}</span>}
+                            </div>
+                          </div>
+                        </Link>
+                      </article>
+                    ))}
+                  </div>
+
+                  {/* 8. Pagination Controls (Only show if there is more than 1 page of results) */}
+                  {totalPages > 1 && (
+                    <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '40px' }}>
+                      <button 
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        style={{ padding: '8px 16px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                      >
+                        Previous
+                      </button>
+                      
+                      <span style={{ fontWeight: 'bold' }}>
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      
+                      <button 
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        style={{ padding: '8px 16px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="no-results">
                   <h2>No products found</h2>

@@ -1,53 +1,28 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
+// Notice: NO Firebase imports up here anymore!
 
-// 1. Import Firebase tools (Make sure the path to firebase.js is correct!)
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase'; 
-// Notice we removed: import { ALL_PRODUCTS } from '../constants';
-
-export function BestSeller() {
-  // 2. New State for Firebase Data
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
+export function BestSeller({ products, loading }) {
+  // We ONLY need state for the UI now. No products state, no loading state!
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortOrder, setSortOrder] = useState('default');
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12; 
 
-  // 3. Fetch data from Firebase when the page loads
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "products"));
-        const productsArray = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setProducts(productsArray);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  // 4. Now this pulls categories dynamically from your CLOUD data!
+  // Dynamically pull categories from the global products prop
   const allCategories = ['All', ...new Set(products.map(product => product.category))];
 
-  // 5. Update useMemo to look at the 'products' state instead of ALL_PRODUCTS
   const displayedProducts = useMemo(() => {
-    let result = products;
+    let result = products; // Using the prop!
 
     if (activeCategory !== 'All') {
       result = result.filter(product => product.category === activeCategory);
     }
 
     if (sortOrder === 'low-high') {
-      // Wrapped in String() just in case the database saved it as a raw number
       result = [...result].sort((a, b) => parseFloat(String(a.newPrice).replace(/,/g, '')) - parseFloat(String(b.newPrice).replace(/,/g, '')));
     } else if (sortOrder === 'high-low') {
       result = [...result].sort((a, b) => parseFloat(String(b.newPrice).replace(/,/g, '')) - parseFloat(String(a.newPrice).replace(/,/g, '')));
@@ -56,7 +31,17 @@ export function BestSeller() {
     return result;
   }, [products, activeCategory, sortOrder]);
 
-  // Show a loading screen while waiting for the cloud
+  // Reset to Page 1 if the user changes the category or sort order
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, sortOrder]);
+
+  // Pagination Math
+  const totalPages = Math.ceil(displayedProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentProducts = displayedProducts.slice(startIndex, startIndex + itemsPerPage);
+
+  // If App.jsx says we are still loading, show this
   if (loading) {
     return (
       <>
@@ -68,7 +53,7 @@ export function BestSeller() {
     );
   }
 
-  // 6. Your layout remains EXACTLY the same!
+  // If App.jsx is done loading, show the actual page!
   return (
     <>
       <Navbar />
@@ -77,7 +62,6 @@ export function BestSeller() {
         <div className="search-page-container">
           <div className="search-layout">
             
-            {/* === LEFT SIDEBAR === */}
             <aside className="search-sidebar">
               <div className="filter-group">
                 <h3>Categories</h3>
@@ -96,7 +80,6 @@ export function BestSeller() {
               </div>
             </aside>
 
-            {/* === RIGHT SIDE === */}
             <main className="search-results">
               
               <div className="results-toolbar">
@@ -119,13 +102,13 @@ export function BestSeller() {
                 </div>
               </div>
 
-              {/* The Product Grid */}
               <div className="product-grid">
-                {displayedProducts.map((product) => (
+                {currentProducts.map((product) => (
                   <article key={product.id} className="product-card">
-                    <Link to={`/products/${product.id}`} style={{ textDecoration: 'none' }}>
+                    {/* Passing state here for the Product Page to catch */}
+                    <Link to={`/products/${product.id}`} state={{ productData: product }} style={{ textDecoration: 'none' }}>
                       <div className="card-image-wrapper">
-                        <img src={product.image} alt={product.title} />
+                        <img src={product.image} alt={product.title} loading="lazy" />
                         {product.sale && <span className="sale-badge">Sale</span>}
                       </div>
                       <div className="card-info">
@@ -139,6 +122,31 @@ export function BestSeller() {
                   </article>
                 ))}
               </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '40px' }}>
+                  <button 
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    style={{ padding: '8px 16px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                  >
+                    Previous
+                  </button>
+                  
+                  <span style={{ fontWeight: 'bold' }}>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  
+                  <button 
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    style={{ padding: '8px 16px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
 
             </main>
           </div>
