@@ -30,6 +30,10 @@ export default function Admin() {
   // Track existing images for editing
   const [existingImages, setExistingImages] = useState([]);
 
+
+  // Add this next to const [sale, setSale] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(false);  // 11 Aug, 2026 flash lite  (for featured product)
+
  
   const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY;
 
@@ -74,13 +78,17 @@ export default function Admin() {
     setDescription(product.description);
     setWhatsInside(product.whatsInside ? product.whatsInside.join('\n') : "");
     setSale(product.sale || false);
-    
+
+    setIsFeatured(product.isFeatured || false);    // featured product state
+
     // Load existing images into state (fallback to empty array if none)
     setExistingImages(product.images || [product.image]); 
     
     // Clear any new files selected
     setImageFile1(null); setImageFile2(null); setImageFile3(null); setImageFile4(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+
   };
 
   const resetForm = () => {
@@ -89,6 +97,8 @@ export default function Admin() {
     setCategory("Birthday"); setSale(false); 
     setExistingImages([]);
     setImageFile1(null); setImageFile2(null); setImageFile3(null); setImageFile4(null);
+
+    setIsFeatured(false);  // feature pdt
   };
 
   // === NEW: Helper function to cleanly upload a single file to ImgBB ===
@@ -145,7 +155,9 @@ export default function Admin() {
         newPrice, 
         sale, 
         description,
-        whatsInside: whatsInsideArray
+        whatsInside: whatsInsideArray,
+
+        isFeatured, // for feature product...
       };
 
       if (editingId) {
@@ -213,7 +225,8 @@ export default function Admin() {
           <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ padding: "8px" }}>
             <option value="Birthday">Birthday</option>
             <option value="Anniversary">Anniversary</option>
-            <option value="Rakhi">Rakhi</option>
+            <option value="Rakshabandhan">Rakshabandhan</option>
+            <option value="Crochet Design">Crochet Design</option>
           </select>
           
           <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} required style={{ padding: "8px", minHeight: "80px" }} />
@@ -254,6 +267,12 @@ export default function Admin() {
             </div>
           </div>
 
+         {/* featured product... */}
+          <label style={{ display: "flex", gap: "10px", alignItems: "center", cursor: "pointer", padding: "5px 0" }}>
+            <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} />
+            <strong style={{ color: "#D4813B" }}>⭐ Set as "Featured Product" (Homepage Banner)</strong>
+          </label>
+
           <label style={{ display: "flex", gap: "10px", alignItems: "center", cursor: "pointer", padding: "10px 0" }}>
             <input type="checkbox" checked={sale} onChange={(e) => setSale(e.target.checked)} />
             <strong style={{ color: "#ff4d4d" }}>Mark as "On Sale"</strong>
@@ -282,6 +301,10 @@ export default function Admin() {
                   <img src={product.image} alt={product.title} style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "4px" }} />
                   <div>
                     <strong>{product.title}</strong>
+
+                     {/* FEatured product added for.. */}
+                    {product.isFeatured && <span style={{ marginLeft: "8px", background: "#FFF3E0", color: "#D4813B", padding: "2px 6px", borderRadius: "4px", fontSize: "12px", fontWeight: "bold" }}>⭐ Featured</span>}
+                    
                     <div style={{ fontSize: "14px", color: "#666" }}>₹{product.newPrice} | {product.category} | {product.images?.length || 1} Images</div>
                   </div>
                 </div>

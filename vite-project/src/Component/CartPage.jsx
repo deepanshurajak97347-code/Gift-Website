@@ -44,6 +44,8 @@ export default function CartPage() {
     
     cartItems.forEach(item => {
       message += `- ${item.qty}x ${item.title} (Rs. ${item.newPrice})%0A`;
+
+      message += `  Image: ${item.image}%0A%0A`;    // updated....
     });
     
     message += `%0A*Total to Pay:* Rs. ${totalPrice.toFixed(2)}`;

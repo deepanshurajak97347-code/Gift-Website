@@ -16,6 +16,9 @@ export function BestSeller({ products, loading }) {
   // Dynamically pull categories from the global products prop
   const allCategories = ['All', ...new Set(products.map(product => product.category))];
 
+ // Paste this temporarily to find the ghost products!
+ console.log("GHOST RAKHI PRODUCTS:", products.filter(p => p.category === "Rakhi" || p.category === "Crochet"));
+
   const displayedProducts = useMemo(() => {
     let result = products; // Using the prop!
 
