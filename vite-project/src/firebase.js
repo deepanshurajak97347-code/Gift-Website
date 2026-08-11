@@ -11,14 +11,13 @@ import { getStorage } from "firebase/storage"; // 1. ADD THIS IMPORT
 
 import { getAuth } from "firebase/auth"; // 1. IMPORT AUTH
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCUt_v63VksaGIA8Gx6Kid_MMy7Qlajtuk",
-  authDomain: "gift-website-aef6d.firebaseapp.com",
-  projectId: "gift-website-aef6d",
-  storageBucket: "gift-website-aef6d.firebasestorage.app",
-  messagingSenderId: "754253239379",
-  appId: "1:754253239379:web:6585d0aa1ba667d720a2a6"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
