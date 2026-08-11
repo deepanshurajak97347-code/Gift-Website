@@ -1,16 +1,21 @@
-/* ================= SEARCH PAGE LAYOUT ================= */
+/* ================= GLOBAL & PAGE LAYOUT ================= */
+* {
+  box-sizing: border-box !important;
+}
+
 .search-page-wrapper {
-  background-color: #FDECE4; /* Your vibrant luxury theme! */
-  width: 100%;
+  background-color: #FDECE4; 
+  width: 100vw; 
   min-height: 100vh;
-  padding: 40px 0 80px 0; /* Top and bottom spacing */
+  padding: 40px 0 80px 0; 
+  overflow-x: hidden;
 }
 
 .search-page-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 20px;
-  color: #2D2522; /* Espresso Brown text */
+  width: 100%;
+  padding: 0 3%; 
+  margin: 0 auto !important; 
+  color: #2D2522; 
 }
 
 .search-header {
@@ -26,18 +31,19 @@
 
 .search-layout {
   display: flex;
+  width: 100%;
   gap: 60px;
   align-items: flex-start;
 }
 
-/* ================= RESULTS TOOLBAR (Top of Grid) ================= */
+/* ================= RESULTS TOOLBAR ================= */
 .results-toolbar {
   display: flex;
-  justify-content: space-between; /* Pushes Count to Left, Sort to Right */
+  justify-content: space-between; 
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #EED8C0; /* A soft divider line */
+  border-bottom: 1px solid #EED8C0; 
 }
 
 .product-count {
@@ -67,15 +73,15 @@
 }
 
 .sort-dropdown:focus {
-  border-color: #D4813B; /* Highlights amber when clicked */
+  border-color: #D4813B; 
 }
 
-/* ================= SIDEBAR (LEFT) ================= */
+/* ================= SEARCH SIDEBAR ================= */
 .search-sidebar {
   width: 250px;
   flex-shrink: 0;
   position: sticky;
-  top: 150px; /* Stays on screen when user scrolls down! */
+  top: 150px; 
 }
 
 .filter-group {
@@ -120,47 +126,66 @@
   font-weight: bold;
 }
 
-.sort-dropdown {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #7A6B63;
-  background-color: transparent;
-  color: #2D2522;
-  font-size: 14px;
-  outline: none;
-  cursor: pointer;
-}
-
-/* ================= PRODUCT GRID (RIGHT) ================= */
+/* ================= PRODUCT GRID (FLUID AUTO-FIT) ================= */
 .search-results {
-  flex: 1; /* Takes up the remaining space */
+  flex: 1; 
+  width: 100%;
+  min-width: 0 !important; /* THE MAGIC FIX */
 }
 
-.product-grid {
+/* .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));  280px was before 
   gap: 40px;
+} */
+
+.products-grid, .product-grid {
+  display: grid;
+  width: 100%;
+  /* 1. Locks it to EXACTLY 3 columns on desktop. */
+  /* 2. If there is only 1 product, it will only take up 1/3 of the space! */
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 30px;
 }
 
+/* ================= IMAGE BLUR TRICK ================= */
 .card-image-wrapper {
   position: relative;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4; 
   border-radius: 8px;
   overflow: hidden;
-  background-color: transparent;
+  background-color: #f9f9f9; 
 }
 
-.card-image-wrapper img {
+.card-image-wrapper .bg-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; 
+  filter: blur(20px) brightness(0.85); 
+  transform: scale(1.15); 
+  z-index: 1;
+}
+
+.card-image-wrapper .fg-clear {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+  z-index: 2;
   transition: transform 0.4s ease;
 }
 
-.product-card:hover .card-image-wrapper img {
-  transform: scale(1.05); /* Slight zoom on hover */
+.product-card:hover .card-image-wrapper .fg-clear {
+  transform: scale(1.05); 
 }
 
+/* ================= CARD INFO ================= */
 .sale-badge {
   position: absolute;
   top: 15px;
@@ -172,6 +197,7 @@
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
+  z-index: 3;
 }
 
 .card-info {
@@ -183,6 +209,11 @@
   font-weight: 500;
   color: #2D2522;
   margin: 0 0 8px 0;
+}
+
+.product-card:hover .card-title {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .card-pricing {
@@ -202,48 +233,24 @@
   font-size: 14px;
 }
 
-.no-results {
-  text-align: center;
-  padding: 60px 0;
-}
-
-.reset-btn {
-  margin-top: 20px;
-  padding: 12px 25px;
-  background-color: #2D2522;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-
-/* ================= RESPONSIVE DESIGN (Mobile & Tablet) ================= */
-@media (max-width: 900px) {
-  
-  /* 1. Stack the sidebar and the grid on top of each other */
+/* ================= RESPONSIVE DESIGN (SEARCH PAGE) ================= */
+/* @media (max-width: 900px) {
   .search-layout {
     flex-direction: column; 
     gap: 30px;
   }
-
-  /* 2. Make the sidebar take up the full width instead of just 250px */
   .search-sidebar {
     width: 100%;
-    position: static; /* Removes the sticky behavior on mobile */
+    position: static; 
   }
-
-  /* 3. Turn the vertical category list into a horizontal wrap */
   .filter-list {
     display: flex;
     flex-wrap: wrap; 
     gap: 10px;
   }
-
-  /* 4. Style the category text as clickable "pills" for touch screens */
   .filter-list li {
     margin-bottom: 0;
   }
-
   .filter-btn {
     background-color: transparent;
     padding: 8px 16px;
@@ -251,19 +258,92 @@
     border: 1px solid #7A6B63;
     text-align: center;
   }
-  
   .filter-btn.active {
     background-color: #2D2522;
     color: #fff;
     border-color: #2D2522;
   }
+}
 
-  /* 5. Stack the toolbar (Total products & Sort dropdown) if screen gets very small */
-  @media (max-width: 500px) {
-    .results-toolbar {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 15px;
-    }
+@media (max-width: 480px) {   600 was 
+  .results-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  .product-grid {
+    gap: 20px;
+  }
+} */
+
+
+@media (max-width: 900px) {
+  /* 1. Layout moves sidebar to the top */
+  .search-layout {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .search-sidebar {
+    width: 100%;
+    position: static; /* Un-sticks the sidebar */
+    margin-bottom: 10px;
+  }
+
+  .filter-group {
+    margin-bottom: 20px;
+  }
+
+  .filter-group h3 {
+    border-bottom: none; /* Removes the hard line on mobile */
+    padding-bottom: 0;
+  }
+
+  /* 2. Turn the vertical list into a horizontal wrapping row */
+  .filter-list {
+    display: flex;
+    flex-direction: row; 
+    flex-wrap: wrap;     
+    gap: 10px;
+  }
+
+  .filter-list li {
+    margin-bottom: 0; /* Clears desktop vertical spacing */
+  }
+
+  /* 3. Transform the text into mobile-friendly "Pill" buttons */
+  .filter-btn {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 20px; 
+    text-align: center;
+    white-space: nowrap; 
+  }
+
+  /* 4. Active category style for mobile */
+  .filter-btn.active {
+    background-color: #2D2522;
+    color: #fff;
+    border-color: #2D2522;
+    font-weight: normal; 
+  }
+
+  /* 5. Grid cleanly drops to 2 columns on tablets */
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 550px) {
+  /* Grid cleanly drops to 1 column on phones */
+  .products-grid, .product-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .collection-toolbar, .results-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
   }
 }

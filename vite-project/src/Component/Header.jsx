@@ -11,9 +11,10 @@ import bd3 from '../assets/bd3.jpeg'
 
 export function LandingPage(){
 
-    console.log("thid compoennt ran!")
     return(
        <>
+
+       <h3>To sho it's working...</h3>
         
         <Navbar />
         <main>

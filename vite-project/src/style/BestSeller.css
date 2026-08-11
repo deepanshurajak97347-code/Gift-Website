@@ -1,157 +1,26 @@
 /* =========================================
-   STICKY HEADER
+   1. GLOBAL FIX FOR THE "SWEEPING" BACKGROUND
 ========================================= */
-.global-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000; /* Keeps the header above all products */
-  width: 100%;
-  background-color: #fff;
-  transition: all 0.3s ease;
-  border-bottom: 1px solid transparent;
+* {
+  box-sizing: border-box; 
 }
 
-/* Adds a subtle shadow when scrolling starts */
-.global-header.scrolled {
-  border-bottom: 1px solid #eaeaea;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* --- Announcement Bar --- */
-.announcement-bar {
-  background-color: #000;
-  color: #fff;
-  text-align: center;
-  padding: 8px 20px;
-  font-size: 12px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  
-  /* These properties allow it to smoothly animate away */
-  height: 35px; 
-  overflow: hidden;
-  transition: height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* When scrolled, shrink the height to 0 to hide it */
-.scrolled .announcement-bar {
-  height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  opacity: 0;
-}
-
-/* --- Main Navigation --- */
-.main-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px; /* Big and airy initially */
-  background-color: #fff;
-  transition: padding 0.3s ease; /* Smoothly animates the padding change */
-}
-
-/* When scrolled, shrink the padding to make the nav thinner */
-.scrolled .main-nav {
-  padding: 10px 40px;
-}
-
-/* --- Logo & Menus --- */
-.logo {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.desktop-menu {
-  display: flex;
-  list-style: none;
-  gap: 30px;
+body, html {
+  overflow-x: hidden; /* Absolutely prevents the background from sweeping/detaching */
   margin: 0;
   padding: 0;
 }
 
-.desktop-menu a {
-  text-decoration: none;
-  color: #333;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: color 0.2s;
-}
-
-.desktop-menu a:hover {
-  color: #000;
-  font-weight: bold;
-}
-
-.utility-icons {
-  display: flex;
-  gap: 15px;
-}
-
-.utility-icons button {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: #333;
-  transition: transform 0.2s;
-}
-
-.utility-icons button:hover {
-  transform: scale(1.1);
-}
-
-.mobile-hamburger-menu {
-  display: none; /* Hidden on desktop */
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-/* --- Header Mobile Responsiveness --- */
-@media (max-width: 900px) {
-  .desktop-menu {
-    display: none; /* Hide standard menu on mobile */
-  }
-  
-  .mobile-hamburger-menu {
-    display: block; /* Show hamburger icon */
-  }
-
-  .main-nav {
-    padding: 15px 20px; /* Smaller initial padding for mobile */
-  }
-  
-  .scrolled .main-nav {
-    padding: 10px 20px;
-  }
-  
-  .logo {
-    font-size: 18px;
-  }
-}
-
-/* =========================================
-   PAGE LAYOUT
-========================================= */
-/* ADD THIS NEW WRAPPER */
 .collection-wrapper {
-  background-color:#FDECE4; 
+  background-color: #FDECE4; 
   width: 100%;
   min-height: 100vh; 
 }
 
+/* THE EXPANDING FIX: No max-width. It stretches dynamically forever. */
 .collection-page-layout {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 40px 20px;
+  width: 100%;
+  padding: 40px 5%; /* 5% padding keeps it breathing but fills the screen */
 }
 
 .collection-header {
@@ -164,19 +33,19 @@
   color: #111;
 }
 
-/* Creates the split layout: 250px sidebar on left, rest of space for grid */
 .collection-content-wrapper {
   display: flex;
+  width: 100%;
   gap: 50px;
   align-items: flex-start;
 }
 
 /* =========================================
-   LEFT SIDEBAR (FILTERS)
+   2. SIDEBAR FILTERS
 ========================================= */
 .sidebar-filters {
   width: 250px;
-  flex-shrink: 0; /* Prevents sidebar from squishing */
+  flex-shrink: 0;
 }
 
 .filter-block {
@@ -212,36 +81,18 @@
   transition: color 0.2s;
 }
 
-.category-list button:hover {
-  color: #000;
-  text-decoration: underline;
-}
-
-/* Highlight the active category */
-.category-list button.active {
+.category-list button:hover, .category-list button.active {
   color: #000;
   font-weight: bold;
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: #444;
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-
-.checkbox-label input {
-  margin-right: 8px;
-  cursor: pointer;
-}
-
 /* =========================================
-   RIGHT SIDE (PRODUCTS)
+   3. MAIN PRODUCTS AREA & TOOLBAR
 ========================================= */
 .main-products-area {
-  flex-grow: 1; /* Takes up all remaining space to the right */
+  /* THE SHRINKING FIX: flex-grow 1, flex-shrink 1, flex-basis 0% */
+  flex: 1 1 0%; 
+  width: 100%;
 }
 
 .collection-toolbar {
@@ -258,33 +109,41 @@
   font-size: 14px;
 }
 
-.sort-dropdown {
+.sort-container {
   display: flex;
   align-items: center;
-}
-
-.sort-dropdown label {
+  gap: 10px;
+  color: #7A6B63;
   font-size: 14px;
-  color: #666;
-  margin-right: 10px;
 }
 
-.sort-dropdown select {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
+.sort-dropdown {
+  background-color: transparent;
+  color: #2D2522;
+  border: 1px solid #7A6B63;
+  padding: 8px 15px;
   border-radius: 4px;
   font-size: 14px;
-  cursor: pointer;
   outline: none;
+  cursor: pointer;
 }
 
 /* =========================================
-   PRODUCT GRID (CSS GRID)
+   4. PRODUCT GRID (Fluid Auto-Fit)
 ========================================= */
-.products-grid {
+/* .products-grid, .product-grid {
   display: grid;
-  /* Auto-fill naturally creates as many columns as will fit (minimum 250px wide) */
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));   250 was before
+  gap: 30px;
+} */
+
+.products-grid, .product-grid {
+  display: grid;
+  width: 100%;
+  /* 1. Locks it to EXACTLY 3 columns on desktop. */
+  /* 2. If there is only 1 product, it will only take up 1/3 of the space! */
+  grid-template-columns: repeat(3, 1fr); 
   gap: 30px;
 }
 
@@ -299,26 +158,48 @@
   display: block;
 }
 
-.image-wrapper {
+/* =========================================
+   5. BLUR TRICK
+========================================= */
+.image-wrapper, .card-image-wrapper {
   position: relative;
   margin-bottom: 15px;
-  aspect-ratio:  3 / 4; /* 1 / 1 /* Portrait mode style commonly used in jewelry/fashion */
+  aspect-ratio: 3 / 4;
   background-color: #f9f9f9;
   border-radius: 6px;
   overflow: hidden;
 }
 
-.product-image {
+.bg-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; 
+  filter: blur(20px) brightness(0.85); 
+  transform: scale(1.15); 
+  z-index: 1;
+}
+
+.fg-clear, .product-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+  z-index: 2;
   transition: transform 0.4s ease;
 }
 
-.product-card:hover .product-image {
-  transform: scale(1.05); /* Slight zoom on hover */
+.product-card:hover .fg-clear, .product-card:hover .product-image {
+  transform: scale(1.05);
 }
 
+/* =========================================
+   6. CARD TYPOGRAPHY
+========================================= */
 .sale-badge {
   position: absolute;
   top: 10px;
@@ -330,22 +211,17 @@
   font-weight: bold;
   border-radius: 3px;
   text-transform: uppercase;
-  z-index: 2;
+  z-index: 3;
 }
 
-.product-title {
+.product-title, .card-title {
   font-size: 15px;
   font-weight: 500;
   margin-bottom: 8px;
   line-height: 1.4;
 }
 
-.product-card:hover .product-title {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.pricing {
+.pricing, .card-pricing {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -359,49 +235,103 @@
 
 .current-price {
   font-weight: 600;
-  color: #d12e2e; /* Red color for e-commerce pricing */
+  color: #d12e2e;
 }
 
-/* =========================================
-   MOBILE RESPONSIVENESS
-========================================= */
-@media (max-width: 900px) {
-  /* On mobile/tablets, stack the sidebar on top of the products */
+/* =======================================
+   7. RESPONSIVE MOBILE
+======================================= */
+/* @media (max-width: 900px) {
   .collection-content-wrapper {
     flex-direction: column;
     gap: 20px;
   }
-  
   .sidebar-filters {
     width: 100%;
   }
-
-  /* Display the category list horizontally on smaller screens */
   .category-list {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
   }
+} 
 
-  .category-list li {
-    margin-bottom: 0;
+@media (max-width: 480px) {     600 was before 
+  .products-grid, .product-grid {
+    grid-template-columns: 1fr; 
+    gap: 15px;
+  }
+  .collection-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+} */
+
+
+@media (max-width: 900px) {
+  /* 1. Un-stack the sidebar */
+  .sidebar-filters {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .filter-block {
+    border-bottom: none; /* Removes the hard line on mobile */
+    padding-bottom: 0;
+  }
+
+  /* 2. Turn the vertical list into a horizontal wrapping row */
+  .category-list {
+    display: flex;
+    flex-direction: row; /* Forces horizontal layout */
+    flex-wrap: wrap;     /* Allows them to wrap to a new line if there are many */
+    gap: 10px;
+  }
+
+  /* 3. Transform the text into mobile-friendly "Pill" buttons */
+  .category-list button {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 20px; /* Makes them look like rounded chips */
+    text-align: center;
+    white-space: nowrap; /* Stops long category names from breaking in half */
+  }
+
+  /* 4. Make the active category clearly visible on mobile */
+  .category-list button.active {
+    background-color: #2D2522;
+    color: #fff;
+    border-color: #2D2522;
+    font-weight: normal; 
+  }
+
+  
+  /* Sidebar moves to the top */
+  .collection-content-wrapper, .search-layout {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .sidebar-filters, .search-sidebar {
+    width: 100%;
+    position: static;
+  }
+  /* Grid cleanly drops to 2 columns on tablets */
+  .products-grid, .product-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 600px) {
-  /* Shrink grid to 2 columns side-by-side for phones */
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 550px) {
+  /* Grid cleanly drops to 1 column on phones */
+  .products-grid, .product-grid {
+    grid-template-columns: 1fr;
     gap: 15px;
   }
-  
-  .product-title {
-    font-size: 14px;
-  }
-  
-  .pricing {
+  .collection-toolbar, .results-toolbar {
     flex-direction: column;
     align-items: flex-start;
-    gap: 2px;
+    gap: 15px;
   }
 }

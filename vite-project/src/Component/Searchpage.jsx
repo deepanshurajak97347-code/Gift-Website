@@ -68,7 +68,7 @@ export default function SearchPage({ products, loading }) {
     );
   }
 
-  return (
+return (
     <>
       <Navbar />
       
@@ -125,16 +125,19 @@ export default function SearchPage({ products, loading }) {
               {filteredProducts.length > 0 ? (
                 <>
                   <div className="product-grid">
-                    {/* 5. Map over currentProducts instead of filteredProducts */}
                     {currentProducts.map((product) => (
                       <article key={product.id} className="product-card">
-                        {/* 6. INSTANT LOAD: Pass the state to the Product Page */}
                         <Link to={`/products/${product.id}`} state={{ productData: product }} style={{ textDecoration: 'none' }}>
+                          
+                          {/* ==========================================
+                              THE BLUR IMAGE TRICK IS NOW HERE!
+                          ========================================== */}
                           <div className="card-image-wrapper">
-                            {/* 7. LAZY LOADING added here */}
-                            <img src={product.image} alt={product.title} loading="lazy" />
+                            <img src={product.image} className="bg-blur" alt="" aria-hidden="true" />
+                            <img src={product.image} className="fg-clear" alt={product.title} loading="lazy" />
                             {product.sale && <span className="sale-badge">Sale</span>}
                           </div>
+
                           <div className="card-info">
                             <h3 className="card-title">{product.title}</h3>
                             <div className="card-pricing">
@@ -147,7 +150,6 @@ export default function SearchPage({ products, loading }) {
                     ))}
                   </div>
 
-                  {/* 8. Pagination Controls (Only show if there is more than 1 page of results) */}
                   {totalPages > 1 && (
                     <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '40px' }}>
                       <button 

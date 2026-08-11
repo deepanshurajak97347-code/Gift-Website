@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
 import { LandingPage } from './Component/Header';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { BestSeller } from './Component/BestSeller';
@@ -45,7 +44,7 @@ function App() {
 
       <BackButton />
 
-      
+
       <Routes>
         {/* 4. Pass the data DOWN to any page that needs it! */}
         <Route path="/" element={<LandingPage products={products} loading={loading} />} />

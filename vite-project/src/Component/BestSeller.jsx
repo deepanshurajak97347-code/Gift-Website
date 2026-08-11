@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
-// Notice: NO Firebase imports up here anymore!
+import '../style/BestSeller.css';
+
 
 export function BestSeller({ products, loading }) {
   // We ONLY need state for the UI now. No products state, no loading state!
@@ -54,22 +55,22 @@ export function BestSeller({ products, loading }) {
   }
 
   // If App.jsx is done loading, show the actual page!
-  return (
+ return (
     <>
       <Navbar />
-
-      <div className="search-page-wrapper">
-        <div className="search-page-container">
-          <div className="search-layout">
+      
+      <div className="collection-wrapper">
+        <div className="collection-page-layout">
+          <div className="collection-content-wrapper">
             
-            <aside className="search-sidebar">
-              <div className="filter-group">
+            <aside className="sidebar-filters">
+              <div className="filter-block">
                 <h3>Categories</h3>
-                <ul className="filter-list">
+                <ul className="category-list">
                   {allCategories.map(category => (
                     <li key={category}>
                       <button 
-                        className={`filter-btn ${activeCategory === category ? 'active' : ''}`}
+                        className={activeCategory === category ? 'active' : ''}
                         onClick={() => setActiveCategory(category)}
                       >
                         {category}
@@ -80,13 +81,14 @@ export function BestSeller({ products, loading }) {
               </div>
             </aside>
 
-            <main className="search-results">
+            <main className="main-products-area">
               
-              <div className="results-toolbar">
+              <div className="collection-toolbar">
                 <span className="product-count">
                   {displayedProducts.length} {displayedProducts.length === 1 ? 'product' : 'products'}
                 </span>
                 
+                {/* THE FIXED SORT SECTION */}
                 <div className="sort-container">
                   <label htmlFor="collectionSort">Sort by:</label>
                   <select 
@@ -105,12 +107,15 @@ export function BestSeller({ products, loading }) {
               <div className="product-grid">
                 {currentProducts.map((product) => (
                   <article key={product.id} className="product-card">
-                    {/* Passing state here for the Product Page to catch */}
-                    <Link to={`/products/${product.id}`} state={{ productData: product }} style={{ textDecoration: 'none' }}>
+                    <Link to={`/products/${product.id}`} state={{ productData: product }} className="product-link">
+                      
+                      {/* THE BLUR IMAGE TRICK */}
                       <div className="card-image-wrapper">
-                        <img src={product.image} alt={product.title} loading="lazy" />
-                        {product.sale && <span className="sale-badge">Sale</span>}
+                         <img src={product.image} className="bg-blur" alt="" aria-hidden="true" />                       
+                         <img src={product.image} className="fg-clear" alt={product.title} loading="lazy" />                  
+                         {product.sale && <span className="sale-badge">Sale</span>}
                       </div>
+ 
                       <div className="card-info">
                         <h3 className="card-title">{product.title}</h3>
                         <div className="card-pricing">
@@ -123,25 +128,24 @@ export function BestSeller({ products, loading }) {
                 ))}
               </div>
 
-              {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '40px' }}>
                   <button 
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    style={{ padding: '8px 16px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                    style={{ padding: '8px 16px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', border: '1px solid #ccc', borderRadius: '4px', background: 'white' }}
                   >
                     Previous
                   </button>
                   
-                  <span style={{ fontWeight: 'bold' }}>
+                  <span style={{ fontWeight: '500', color: '#333' }}>
                     Page {currentPage} of {totalPages}
                   </span>
                   
                   <button 
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    style={{ padding: '8px 16px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                    style={{ padding: '8px 16px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', border: '1px solid #ccc', borderRadius: '4px', background: 'white' }}
                   >
                     Next
                   </button>

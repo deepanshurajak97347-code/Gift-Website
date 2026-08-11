@@ -82,8 +82,11 @@ export default function ProductPage({ products, loading }) {
            
            {/* === NEW GALLERY SECTION === */}
            <div className="product-gallery">
+             
+             {/* THE BLUR IMAGE TRICK IS NOW HERE */}
              <div className="main-image-wrapper">
-               <img src={mainImage} alt={product.title} className="main-image" loading="lazy" />
+               <img src={mainImage} className="bg-blur" alt="" aria-hidden="true" />
+               <img src={mainImage} alt={product.title} className="main-image fg-clear" loading="lazy" />
              </div>
              
              {/* Map through the images array to create clickable thumbnails */}
