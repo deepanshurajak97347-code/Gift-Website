@@ -13,8 +13,6 @@ export function LandingPage(){
 
     return(
        <>
-
-       <h3>To sho it's working...</h3>
         
         <Navbar />
         <main>
