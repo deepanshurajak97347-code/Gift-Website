@@ -30,6 +30,29 @@ export function LandingPage({ products, loading }){
             </div>
           </section>
 
+                    {/* ================= THE "SMALL THINGS" (Store Perks) ================= */}
+            <section className="store-perks-section">
+            <div className="perks-container">
+                <div className="perk-item">
+                <span className="perk-icon">🚚</span>
+                <h4 className="perk-title">Pan India Delivery</h4>
+                <p className="perk-desc">Fast & secure shipping across the country.</p>
+                </div>
+                
+                <div className="perk-item">
+                <span className="perk-icon">🎁</span>
+                <h4 className="perk-title">Premium Packaging</h4>
+                <p className="perk-desc">Every order is packed like a luxury gift.</p>
+                </div>
+                
+                <div className="perk-item">
+                <span className="perk-icon">✨</span>
+                <h4 className="perk-title">Handcrafted with Love</h4>
+                <p className="perk-desc">Curated items chosen for maximum joy.</p>
+                </div>
+            </div>
+            </section>
+
 
             {/* ================= FEATURED SINGLE PRODUCT ================= */}
             {!loading && featuredProduct && (
